@@ -1,0 +1,6 @@
+lib/Mojolicious/Plugin/TagHelpers/Pagination.pm
+t/pagination.t
+Changes
+MANIFEST
+LICENSE
+Makefile.PL

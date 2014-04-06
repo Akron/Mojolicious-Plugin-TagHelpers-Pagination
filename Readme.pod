@@ -1,0 +1,162 @@
+=pod
+
+=head1 NAME
+
+Mojolicious::Plugin::TagHelpers::Pagination - Pagination Helper for Mojolicious
+
+
+=head1 SYNOPSIS
+
+  # Mojolicious
+  $app->plugin('TagHelpers::Pagination' => {
+    separator => ' ',
+    current => '<strong>{current}</strong>'
+  });
+
+  # Mojolicious::Lite
+  plugin 'TagHelpers::Pagination' => {
+    separator => ' ',
+    current   =>  '<strong>{current}</strong>'
+  };
+
+  # In Templates
+  %= pagination(2, 4, '?page={page}' => { separator => "\n" })
+  # <a href="?page=1" rel="prev">&lt;</a>
+  # <a href="?page=1">1</a>
+  # <a rel="self"><strong>2</strong></a>
+  # <a href="?page=3">3</a>
+  # <a href="?page=4">4</a>
+  # <a href="?page=3" rel="next">&gt;</a>
+
+=head1 DESCRIPTION
+
+L<Mojolicious::Plugin::TagHelpers::Pagination> helps you to create
+pagination elements in your templates, like this:
+
+L<E<lt>|#> L<1|#> ... L<5|#> B<[6]> L<7|#> ... L<18|#> L<E<gt>|#>
+
+=head1 METHODS
+
+L<Mojolicious::Plugin::TagHelpers::Pagination> inherits all methods from
+L<Mojolicious::Plugin> and implements the following new one.
+
+
+=head2 register
+
+  # Mojolicious
+  $app->plugin('TagHelpers::Pagination' => {
+    separator => ' ',
+    current => '<strong>{current}</strong>'
+  });
+
+  # Or in your config file
+  {
+    'TagHelpers-Pagination' => {
+      separator => ' ',
+      current => '<strong>{current}</strong>'
+    }
+  }
+
+Called when registering the plugin.
+
+All L<parameters|/PARAMETERS> can be set either on registration or
+as part of the configuration file with the key C<TagHelpers-Pagination>.
+
+
+=head1 HELPERS
+
+=head2 pagination
+
+  # In Templates:
+  %= pagination(4, 6 => '/page-{page}.html');
+  % my $url = Mojo::URL->new->query({ page => '{page}'});
+  %= pagination(4, 6 => $url);
+  %= pagination(4, 6 => '/page/{page}.html', { current => '<b>{current}</b>' });
+
+Generates a pagination string.
+Expects at least two numeric values: the current page number and
+the total count of pages.
+Additionally it accepts a link pattern and a hash reference
+with parameters overwriting the default plugin parameters for
+pagination.
+The link pattern can be a string using a placeholder in curly brackets
+(defaults to C<page>) for the page number it should link to.
+It's also possible to give a
+L<Mojo::URL> object containing the placeholder.
+The placeholder can be used multiple times.
+
+
+=head1 PARAMETERS
+
+For the layout of the pagination string, the plugin accepts the
+following parameters, that are able to overwrite the default
+layout elements. These parameters can again be overwritten in
+the pagination helper.
+
+=over 2
+
+=item current
+
+Pattern for current page number. The C<{current}> is a
+placeholder for the current number.
+Defaults to C<[{current}]>.
+Instead of a pattern, both sides of the current number
+can be defined with C<current_start> and C<current_end>.
+
+
+=item ellipsis
+
+Placeholder symbol for hidden pages. Defaults to C<...>.
+
+
+=item next
+
+Symbol for next pages. Defaults to C<&gt;>.
+
+
+=item page
+
+Pattern for page number. The C<{page}> is a
+placeholder for the page number.
+Defaults to C<{page}>.
+Instead of a pattern, both sides of the page number
+can be defined with C<page_start> and C<page_end>.
+
+
+=item placeholder
+
+String representing the placeholder for the page number in the URL
+pattern. Defaults to C<page>.
+
+
+=item prev
+
+Symbol for previous pages. Defaults to C<&lt;>.
+
+
+=item separator
+
+Symbol for the separation of pagination elements.
+Defaults to C<&nbsp;>.
+
+=back
+
+
+=head1 DEPENDENCIES
+
+L<Mojolicious>.
+
+
+=head1 AVAILABILITY
+
+  https://github.com/Akron/Mojolicious-Plugin-TagHelpers-Pagination
+
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright (C) 2012-2014, L<Nils Diewald|http://nils-diewald.de/>.
+
+This program is free software, you can redistribute it
+and/or modify it under the terms of the Artistic License version 2.0.
+
+=cut
