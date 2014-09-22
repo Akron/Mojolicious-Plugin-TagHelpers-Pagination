@@ -59,8 +59,9 @@ L<Mojolicious::Plugin> and implements the following new one.
 
 Called when registering the plugin.
 
-All L<parameters|/PARAMETERS> can be set either on registration or
-as part of the configuration file with the key C<TagHelpers-Pagination>.
+All L<parameters|/PARAMETERS> can be set either as part of the configuration
+file with the key C<TagHelpers-Pagination> or on registration
+(that can be overwritten by configuration).
 
 
 =head1 HELPERS

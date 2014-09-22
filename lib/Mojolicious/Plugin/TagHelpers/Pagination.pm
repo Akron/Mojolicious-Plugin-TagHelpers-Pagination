@@ -4,7 +4,7 @@ use Mojo::ByteStream 'b';
 use Scalar::Util 'blessed';
 use POSIX 'ceil';
 
-our $VERSION = 0.01;
+our $VERSION = 0.04;
 
 our @value_list =
   qw/prev
@@ -25,7 +25,7 @@ sub register {
 
   # Load parameter from Config file
   if (my $config_param = $mojo->config('TagHelpers-Pagination')) {
-    $param = { %$config_param, %$param };
+    $param = { %$param, %$config_param };
   };
 
   foreach (@value_list) {
@@ -37,8 +37,8 @@ sub register {
   # Same for 'page'.
   foreach (qw/page current/) {
     if (defined $param->{$_}) {
-      @{$plugin}{$_ . '_start', $_ . '_end'} = split("{$_}", $param->{$_});
-      $plugin->{$_ . '_end'} ||= '';
+      @{$plugin}{"${_}_start", "${_}_end"} = split("{$_}", $param->{$_});
+      $plugin->{"${_}_end"} ||= '';
     };
   };
 
@@ -58,7 +58,6 @@ sub register {
   # Establish pagination helper
   $mojo->helper(
     pagination => sub {
-      shift; # Controller
       return b( $plugin->pagination( @_ ) );
     });
 };
@@ -67,12 +66,13 @@ sub register {
 # Pagination helper
 sub pagination {
   my $self = shift;
+  my $c = shift;
 
   # $_[0] = current page
   # $_[1] = page count
   # $_[2] = template or Mojo::URL
 
-  return '' unless $_[0] || $_[1];
+  return '' unless $_[1];
 
   # No valid count given
   local $_[1] = !$_[1] ? 1 : ceil($_[1]);
@@ -108,8 +108,7 @@ sub pagination {
     $t =~ s/\%7[bB]$ph\%7[dD]/{$ph}/g;
   };
 
-
-  my $sub = sublink_gen($t,$ps,$pe,$ph);
+  my $sub = sublink_gen($c, $t, $ps, $pe, $ph) or return '';
 
   # Pagination string
   my $e;
@@ -218,17 +217,19 @@ sub pagination {
   $e;
 };
 
+
 # Sublink function generator
 sub sublink_gen {
+  my $c = shift;
   my ($url, $ps, $pe, $ph) = @_;
 
-  my $s = 'sub {';
+  my $s = 'sub{';
   # $_[0] = number
   # $_[1] = number_shown
 
   # Url is template
-  if ($url) {
-    $s .= 'my $url=' . b($url)->quote . ';';
+  if ($url && length($url) > 0) {
+    $s .= 'my $url=' . _quote($url) . ';';
     $s .= 'if($_[0]){$url=~s/\{' . $ph . '\}/$_[0]/g}else{$url=undef};';
   }
 
@@ -237,26 +238,33 @@ sub sublink_gen {
     $s .= 'my $url = $_[0];';
   };
 
-  $s .= 'my$n=$_[1]||' . b($ps)->quote . '.$_[0].' . b($pe)->quote . ';';
-  $s .= q{my $rel='';};
-  $s .= q{if(ref $n){$rel=' rel="'.$n->[1].'"';$n=$n->[0]};};
-  $s .= q!if($url){$url=~s/&/&amp;/g;!;
-  $s .= q{$url=~s/</&lt;/g;};
-  $s .= q{$url=~s/>/&gt;/g;};
-  $s .= q{$url=~s/"/&quot;/g;};
-  $s .= q!$url=~s/'/&#39;/g;};!;
+  $s .= q!my$n=$_[1]||! . _quote($ps) . '.$_[0].' . _quote($pe) . ';' .
+        q{my $rel='';} .
+	q{if(ref $n){$rel=' rel="'.$n->[1].'"';$n=$n->[0]};} .
+        q!if($url){$url=~s/&/&amp;/g;! .
+        q{$url=~s/</&lt;/g;} .
+	q{$url=~s/>/&gt;/g;} .
+        q{$url=~s/"/&quot;/g;} .
+        q!$url=~s/'/&#39;/g;};!;
 
   # Create sublink
-  $s .= q{return '<a'.($url?' href="'.$url.'"':'').$rel.'>' . $n . '</a>';};
-  $s .= '}';
+  $s .= q!return '<a'.($url?' href="'.$url.'"':'').$rel.'>' . $n . '</a>';}!;
 
-  my $x = eval($s);
+  my $x = eval $s;
 
-  warn $@ if $@;
+  # Log evaluation error and return
+  $c->app->log->warn($@) and return if $@;
 
   $x;
 };
 
+
+# Quote with a single quote
+sub _quote {
+  my $str = shift;
+  $str =~ s/(['\\])/\\$1/g;
+  return qq{'$str'};
+};
 
 1;
 
@@ -324,8 +332,9 @@ L<Mojolicious::Plugin> and implements the following new one.
 
 Called when registering the plugin.
 
-All L<parameters|/PARAMETERS> can be set either on registration or
-as part of the configuration file with the key C<TagHelpers-Pagination>.
+All L<parameters|/PARAMETERS> can be set either as part of the configuration
+file with the key C<TagHelpers-Pagination> or on registration
+(that can be overwritten by configuration).
 
 
 =head1 HELPERS
