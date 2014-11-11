@@ -85,7 +85,8 @@ The link pattern can be a string using a placeholder in curly brackets
 It's also possible to give a
 L<Mojo::URL> object containing the placeholder.
 The placeholder can be used multiple times.
-
+In case the total count of pages is unknown, a C<-1> can be passed
+and the final page is ommited for pagination.
 
 =head1 PARAMETERS
 
