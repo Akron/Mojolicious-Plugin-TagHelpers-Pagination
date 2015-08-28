@@ -4,7 +4,7 @@ use Mojo::ByteStream 'b';
 use Scalar::Util 'blessed';
 use POSIX 'ceil';
 
-our $VERSION = 0.05;
+our $VERSION = 0.06;
 
 our @value_list =
   qw/prev
@@ -121,6 +121,7 @@ sub pagination {
 	($_[1] == -1 && $_[0] > 4)){
 
     # < [1] #2 #3
+    # The current page is 1
     if ($_[0] == 1){
       $e .= $sub->(undef, [$p, 'prev']) . $s .
 	    $sub->(undef, [$cs . 1  . $ce, 'self']) . $s .
@@ -129,29 +130,34 @@ sub pagination {
     }
 
     # < #1 #2 #3
-    elsif (!$_[0]) {
+    # The current page is 0
+    elsif ($_[0] == 0) {
       $e .= $sub->(undef, [$p, 'prev']) . $s;
       $e .= $sub->($_) . $s foreach (1 .. 3);
     }
 
     # #< #1
+    # The current page is anywhere
     else {
       $e .= $sub->(($_[0] - 1), [$p, 'prev']) . $s .
             $sub->('1') . $s;
     };
 
     # [2] #3
-    if ($_[0] == 2){
+    # The current page is 2
+    if ($_[0] == 2) {
       $e .= $sub->(undef, [$cs . 2 . $ce, 'self']) . $s .
 	    $sub->('3') . $s;
     }
 
     # ...
-    elsif ($_[0] > 3){
+    # The current page is beyond 3
+    elsif ($_[0] > 3) {
       $e .= $el . $s;
     };
 
     # #x-1 [x] #x+1
+    # The current page is beyond 2 and there are at least 2 pages to go
     if (($_[0] >= 3) && ($_[0] <= ($_[1] - 2))) {
       $e .= $sub->($_[0] - 1) . $s .
 	    $sub->(undef, [$cs .$_[0] . $ce, 'self']) . $s .
@@ -159,17 +165,20 @@ sub pagination {
     };
 
     # ...
+    # There are at least 2 pages following the current page
     if ($_[0] < ($_[1] - 2)){
       $e .= $el . $s;
     };
 
-    # number is prefinal
+    # The current page is prefinal
     if ($_[0] == ($_[1] - 1)){
       $e .= $sub->($_[1] - 2) . $s .
-	    $sub->(undef, [$cs . $_[0] . $ce, 'self']) . $s;
+	    $sub->(undef, [$cs . $_[0] . $ce, 'self']) . $s .
+	      $sub->($_[1]) . $s .
+	      $sub->($_[1], [$n, 'next']);
     }
 
-    # Number is final
+    # The current page is final
     elsif ($_[0] == $_[1]) {
       $e .= $sub->($_[0] - 1) . $s .
             $sub->(undef, [$cs . $_[0] . $ce, 'self']) . $s .
@@ -187,7 +196,7 @@ sub pagination {
     # Number is anywhere in between
     else {
 	$e .= $sub->($_[1]) . $s .
-	      $sub->(($_[0] + 1), [$n,'next']);
+	      $sub->(($_[0] + 1), [$n, 'next']);
     };
   }
 

@@ -195,6 +195,9 @@ is($c->pagination( 5, -1, '/?p={page}' => $type ), '<a href="/?p=4" rel="prev">&
 is($c->pagination( 6, -1, '/?p={page}' => $type ), '<a href="/?p=5" rel="prev">&lt;</a> <a href="/?p=1">1</a> ... <a href="/?p=5">5</a> <a rel="self">[6]</a> ... <a href="/?p=7" rel="next">&gt;</a>', 'Unknown page number 6');
 is($c->pagination( 120, -1, '/?p={page}' => $type ), '<a href="/?p=119" rel="prev">&lt;</a> <a href="/?p=1">1</a> ... <a href="/?p=119">119</a> <a rel="self">[120]</a> ... <a href="/?p=121" rel="next">&gt;</a>', 'Unknown page number 120');
 
+is($c->pagination( 8, 9, '/?p={page}'), '<a href="/?p=7" rel="prev">&lt;</a>&nbsp;<a href="/?p=1">1</a>&nbsp;...&nbsp;<a href="/?p=7">7</a>&nbsp;<a rel="self">[8]</a>&nbsp;<a href="/?p=9">9</a>&nbsp;<a href="/?p=9" rel="next">&gt;</a>', 'Prefinal bug');
+
+is($c->pagination( 4, 5, '/?p={page}'), '<a href="/?p=3" rel="prev">&lt;</a>&nbsp;<a href="/?p=1">1</a>&nbsp;<a href="/?p=2">2</a>&nbsp;<a href="/?p=3">3</a>&nbsp;<a rel="self">[4]</a>&nbsp;<a href="/?p=5">5</a>&nbsp;<a href="/?p=5" rel="next">&gt;</a>', 'Prefinal bug');
 
 done_testing;
 __END__
