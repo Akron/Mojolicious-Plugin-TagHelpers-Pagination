@@ -122,6 +122,8 @@ Callback for visualizing page numbers. The page number
 is passed as the first parameter to C<num_format> and
 a returned string value is expected.
 
+B<This parameter is EXPERIMENTAL and may change without warning.>
+
 
 =item page
 
