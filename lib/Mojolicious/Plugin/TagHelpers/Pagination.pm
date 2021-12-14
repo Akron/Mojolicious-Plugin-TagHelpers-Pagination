@@ -4,7 +4,7 @@ use Mojo::ByteStream 'b';
 use Scalar::Util 'blessed';
 use POSIX 'ceil';
 
-our $VERSION = 0.10;
+our $VERSION = '0.10';
 
 our @value_list =
   qw/prev
