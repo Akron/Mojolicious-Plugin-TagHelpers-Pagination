@@ -116,6 +116,13 @@ Placeholder symbol for hidden pages. Defaults to C<...>.
 Symbol for next pages. Defaults to C<&gt;>.
 
 
+=item num_format
+
+Callback for visualizing page numbers. The page number
+is passed as the first parameter to C<num_format> and
+a returned string value is expected.
+
+
 =item page
 
 Pattern for page number. The C<{page}> is a
